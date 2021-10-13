@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sanic-web-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sanic-web-service
+  template:
+    metadata:
+      labels:
+        app: sanic-web-service
+    spec:
+      volumes:
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+      - name: config
+        configMap:
+          name: sanic-web-service-conf
+          items:
+          - key: sanic-settings
+            path: settings.py
+      initContainers:
+      - name: setsysctl
+        image: busybox:1.33.1
+        securityContext:
+          privileged: true
+        command:
+        - sh
+        - -c
+        - |
+          sysctl -w net.core.somaxconn=65535
+          sysctl -w net.ipv4.ip_local_port_range="1024 65535"
+          sysctl -w net.ipv4.tcp_tw_reuse=1
+          sysctl -w fs.file-max=1048576
+      containers:
+      - name: sanic-web-service
+        image: sanic-web-service:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: localtime
+          mountPath: /etc/localtime
+          subPath: config
+        - name: config
+          mountPath: /code/config/settings.py
+          subPath: settings.py
+        ports:
+        - containerPort: 80

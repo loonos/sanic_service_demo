@@ -1,0 +1,9 @@
+aiohttp-requests
+aiomysql
+aioredis
+marshmallow-sqlalchemy
+packaging
+sanic
+sqlalchemy
+ujson
+webargs-sanic

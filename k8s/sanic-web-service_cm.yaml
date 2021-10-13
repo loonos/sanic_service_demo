@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sanic-web-service-conf
+data:
+  sanic-settings: |
+    MYSQL_HOST = ""
+    MYSQL_PORT = 3306
+    MYSQL_USER = ""
+    MYSQL_PASSWORD = ""
+    MYSQL_POOL_RECYCLE = 1800
+    MYSQL_DB = ""
+    REDIS_HOST = ""
+    REDIS_PORT = 6379
+    REDIS_DB = 0
+    REDIS_PASSWORD = ""
