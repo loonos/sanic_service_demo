@@ -2,6 +2,7 @@ import math
 from datetime import datetime
 from library.utils import use_cache
 from sqlalchemy import select, func
+from .common import paginate
 from ..model.models import SomeModel
 from ..model.schemas import SomeModelSchema
 
@@ -17,18 +18,12 @@ async def some_get_svc(request, type_, page, size):
                       SomeModel.name,
                       SomeModel.add_time).where(SomeModel.type == type_)
 
-        query = await session.execute(stmt.limit(size).
-                                      offset((page - 1) * size))
-        query_res = query.all()
-
-        total = await session.execute(select(func.count().label("total")).
-                                      select_from(stmt.subquery()))
-        total = total.fetchone().total
+        paged = await paginate(session, stmt, page, size)
 
     schema = SomeModelSchema(many=True)
-    return {"page": page, "size": size, "total": total,
-            "pages": int(math.ceil(total / float(size))),
-            "items": schema.dump(query_res)}
+    return {"page": paged.page, "size": paged.size,
+            "pages": paged.pages, "total": paged.total,
+            "items": schema.dump(paged.items)}
 
 
 async def some_post_svc(request, type_, name):
